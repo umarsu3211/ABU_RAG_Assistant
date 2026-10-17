@@ -12,7 +12,7 @@ st.set_page_config(
     page_icon="🎓",
     layout="wide"
 )
-
+st.markdown("""<style>div[style*="background"] *{color:#000!important}</style>""", unsafe_allow_html=True)
 # DISCLAIMER - NOT OFFICIAL ABU WEBSITE
 st.markdown("""
 <div style='background-color:#ffebee;padding:12px;border-left:5px solid #c62828;border-radius:5px;text-align:center'>
