@@ -1,5 +1,9 @@
 # ABU RAG Assistant - COEN 872 SYSTEM DEVELOPMENT
+**Student:** Umar Umar Sani - P25EGCP8057  
+**Supervisor:** Prof. M. B. Muazu  
+**Live Demo:** https://gplw8bg7a.streamlit.app
 
+---
 **STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE**
 Not affiliated with abu.edu.ng - This is student academic project. Datasets hosted independently on GitHub, not linked to official ABU portal.
 
