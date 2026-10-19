@@ -29,13 +29,22 @@ if 'selected_doc_meta' not in st.session_state:
 if 'selected_query' not in st.session_state:
     st.session_state.selected_query = ""
 
+# PROFESSIONAL HEADER WITH ABU LOGOS BOTH SIDES
 st.markdown("""
-<div style='background-color:#ffebee;padding:12px;border-left:5px solid #c62828;border-radius:5px;text-align:center'>
-<b style='color:#c62828 !important;font-size:16px'>⚠️ STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE</b><br>
-<span style='color:#000000 !important;font-size:13px'>COEN 872 SYSTEM DEVELOPMENT | Academic Purpose</span>
+<div style='display:flex; justify-content:space-between; align-items:center; background-color:#f5f5f5; padding:10px; border-radius:10px; border:2px solid #006400'>
+    <div style='width:80px'>
+        <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Ahmadu_Bello_University_logo.png/200px-Ahmadu_Bello_University_logo.png' width='70'>
+    </div>
+    <div style='text-align:center; flex:1'>
+        <b style='color:#c62828 !important; font-size:16px'>⚠️ STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE</b><br>
+        <span style='color:#006400 !important; font-weight:bold; font-size:20px'>ABU Administrative Knowledge Assistant</span><br>
+        <span style='color:#000000 !important; font-size:14px'>COEN 872 SYSTEM DEVELOPMENT | Academic Purpose</span>
+    </div>
+    <div style='width:80px'>
+        <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Ahmadu_Bello_University_logo.png/200px-Ahmadu_Bello_University_logo.png' width='70'>
+    </div>
 </div>
 """, unsafe_allow_html=True)
-
 st.markdown("<h1 style='text-align:center;color:#006400 !important;'>🎓 ABU Administrative Knowledge Assistant</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align:center;color:#000000 !important;'>COEN 872 - Ahmadu Bello University</h3>", unsafe_allow_html=True)
 st.info("System Workflow: User Query → Embedding → Vector Search → Retrieval → LLM Processing → Response")
