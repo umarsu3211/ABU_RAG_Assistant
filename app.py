@@ -57,7 +57,14 @@ if os.path.exists(DATA_FOLDER):
             files_in_data.append(f)
 
 if files_in_data:
-    st.success(f"✅ {len(files_in_data)} permanent files found: {', '.join(files_in_data)}")
+st.success(f"✅ {len(files_in_data)} permanent files - PERMANENT STORAGE (Will remain after logout)")
+# Show files in clean broken lines, 2 columns
+with st.expander(f"📚 View {len(files_in_data)} ABU Documents Loaded", expanded=False):
+    cols = st.columns(2)
+    for idx, fname in enumerate(files_in_data):
+        # Clean name - remove .pdf and shorten
+        clean_name = fname.replace('.pdf','').replace('_',' ').replace('-',' ')[:45]
+        cols[idx % 2].markdown(f"**{idx+1}.** {clean_name}")
     for file_name in files_in_data:
         file_path = os.path.join(DATA_FOLDER, file_name)
         try:
