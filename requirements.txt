@@ -1,9 +1,9 @@
 streamlit
-langchain
-langchain-community
-faiss-cpu
-sentence-transformers
 PyPDF2
 python-docx
-pypdf
-docx2txt
+langchain
+langchain-community
+langchain-text-splitters
+sentence-transformers
+faiss-cpu
+torch
