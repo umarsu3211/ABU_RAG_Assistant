@@ -25,17 +25,47 @@ if 'full_content' not in st.session_state:
 if 'meta' not in st.session_state:
     st.session_state.meta = {}
 
+# --- WATERMARK + HEADER FIX ---
 st.markdown("""
-<div style='display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; padding:10px; border-radius:10px; border:2px solid #006400'>
-<div><img src='https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png' width='65'></div>
-<div style='text-align:center; flex:1'>
-<b style='color:#c62828 !important;'>STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE</b><br>
-<span style='color:#006400 !important; font-weight:bold; font-size:22px'>ABU Administrative Knowledge Assistant</span><br>
-<span style='color:#000 !important;'>COEN 872 - Ahmadu Bello University</span>
-</div>
-<div><img src='https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png' width='65'></div>
-</div>
+<style>
+/* WATERMARK - ABU Logo behind all text */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 500px 500px;
+    opacity: 0.07;
+    z-index: -1;
+    pointer-events: none;
+}
+</style>
 """, unsafe_allow_html=True)
+
+# --- HEADER WITH SIDE LOGOS USING COLUMNS (Always works) ---
+col_logo1, col_title, col_logo2 = st.columns([1, 4, 1])
+
+with col_logo1:
+    st.image("https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png", width=80)
+
+with col_title:
+    st.markdown("""
+    <div style='text-align:center'>
+    <b style='color:#c62828;'>STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE</b><br>
+    <span style='color:#006400; font-weight:bold; font-size:22px'>ABU Administrative Knowledge Assistant</span><br>
+    <span style='color:#000;'>COEN 872 - Ahmadu Bello University</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_logo2:
+    st.image("https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png", width=80)
+
+st.divider()
 
 st.info("Workflow: User Query -> Embedding -> Vector Search -> Retrieval -> LLM Synthesis")
 
