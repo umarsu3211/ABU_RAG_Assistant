@@ -6,6 +6,5 @@ langchain-community
 langchain-text-splitters
 faiss-cpu
 sentence-transformers
-torch
-torchvision
+google-genai
 google-generativeai
