@@ -24,43 +24,38 @@ if 'full_content' not in st.session_state:
     st.session_state.full_content = ""
 if 'meta' not in st.session_state:
     st.session_state.meta = {}
-# --- WATERMARK + HEADER FIX ---
-st.markdown("""
-<style>
-
+# 
 import base64
 
-# --- Convert local logo to base64 for watermark ---
-def get_base64_logo(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode()
-
+# --- WATERMARK - FIXED NO SYNTAX ERROR ---
 try:
-    logo_base64 = get_base64_logo("abu_logo.png")
-    watermark_css = f"""
+    with open("abu_logo.png", "rb") as img_file:
+        logo_base64 = base64.b64encode(img_file.read()).decode()
+    
+    watermark_css = """
     <style>
-    .stApp::before {{
+    .stApp::before {
         content: "";
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url('data:image/png;base64,{logo_base64}');
+        background-image: url('data:image/png;base64,""" + logo_base64 + """');
         background-repeat: no-repeat;
         background-position: center center;
-        background-size: 550px 550px;
-        opacity: 0.08;
+        background-size: 500px 500px;
+        opacity: 0.07;
         z-index: -1;
         pointer-events: none;
-    }}
+    }
     </style>
     """
     st.markdown(watermark_css, unsafe_allow_html=True)
-except:
-    pass
+except Exception as e:
+    st.write(f"Logo not found: {e}")
 
-# --- HEADER WITH LOCAL LOGOS - WILL ALWAYS SHOW ---
+# --- HEADER WITH LOCAL LOGOS ---
 col_logo1, col_title, col_logo2 = st.columns([1, 4, 1])
 
 with col_logo1:
@@ -77,21 +72,6 @@ with col_title:
 
 with col_logo2:
     st.image("abu_logo.png", width=90)
-# --- HEADER WITH SIDE LOGOS USING COLUMNS (Always works) ---
-col_logo1, col_title, col_logo2 = st.columns([1, 4, 1])
-
-with col_logo1:
-    st.image("https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png", width=80)
-
-with col_title:
-    st.markdown("""
-    <div style='text-align:center'>
-    <b style='color:#c62828;'>STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE</b><br>
-    <span style='color:#006400; font-weight:bold; font-size:22px'>ABU Administrative Knowledge Assistant</span><br>
-    <span style='color:#000;'>COEN 872 - Ahmadu Bello University</span>
-    </div>
-    """, unsafe_allow_html=True)
-
 with col_logo2:
     st.image("https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png", width=80)
 
