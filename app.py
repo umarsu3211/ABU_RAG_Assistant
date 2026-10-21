@@ -8,10 +8,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 
 st.set_page_config(page_title="ABU RAG - COEN 872", layout="wide")
 
-# --- LOGO PATH - YOU UPLOADED INSIDE data FOLDER ---
 logo_path = "data/abu_logo.png"
 
-# --- WATERMARK ---
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
@@ -25,26 +23,24 @@ if os.path.exists(logo_path):
         background-repeat: no-repeat;
         background-position: center;
         background-size: 550px 550px;
-        opacity: 0.07;
+        opacity: 0.08;
         z-index: -1;
         pointer-events: none;
     }}
     </style>
     """, unsafe_allow_html=True)
 
-# --- HEADER WITH LOGOS ---
 c1, c2, c3 = st.columns([1,4,1])
 with c1:
     if os.path.exists(logo_path):
         st.image(logo_path, width=90)
 with c2:
-    st.markdown("<div style='text-align:center'><b style='color:#c62828;'>STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE</b><br><span style='color:#006400; font-weight:bold; font-size:22px'>ABU Administrative Knowledge Assistant</span><br><span>COEN 872</span></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center'><b style='color:#c62828;'>STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE</b><br><span style='color:#006400; font-weight:bold; font-size:22px'>ABU Administrative Knowledge Assistant</span><br><span>COEN 872 - Ahmadu Bello University</span></div>", unsafe_allow_html=True)
 with c3:
     if os.path.exists(logo_path):
         st.image(logo_path, width=90)
 st.divider()
 
-# --- SESSION ---
 if 'selected_query' not in st.session_state:
     st.session_state.selected_query = ""
 if 'selected_doc_index' not in st.session_state:
@@ -54,9 +50,8 @@ if 'full_content' not in st.session_state:
 if 'meta' not in st.session_state:
     st.session_state.meta = {}
 
-st.info("Workflow: Query → Embedding (all-MiniLM) → Vector Search (FAISS) → Retrieval → LLM Synthesis (Gemini)")
+st.info("Workflow: Query -> Embedding -> Vector Search -> Retrieval -> LLM Synthesis")
 
-# --- LOAD DOCS ---
 DATA_FOLDER = "data"
 docs_text = []
 metadatas = []
@@ -133,21 +128,36 @@ if files_in_data:
                 st.success(st.session_state.full_content)
             with col2:
                 st.subheader("RAG Answer (Gemini Summary)")
+                context = st.session_state.full_content
+                prompt = f"You are ABU Assistant. Summarize in your own words, student-friendly. Question: {user_query} Context: {context} Cite [Source: {st.session_state.meta.get('source')} Page {st.session_state.meta.get('page')}]"
+                
+                gemini_answer = None
+                # Try 1: Old google-generativeai
                 try:
-    import google.generativeai as genai
-    gemini_key = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=gemini_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
-    st.info(response.text)
-except Exception as e2:
-    st.error(f"Gemini error: {e2}")
-    # Fallback to new google-genai client
-    try:
-        from google import genai as new_genai
-        client = new_genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
-        st.info(response.text)
-    except Exception as e3:
-        st.error(f"Second try failed: {e3}")
-        st.info(st.session_state.full_content[:800])
+                    import google.generativeai as genai_old
+                    genai_old.configure(api_key=st.secrets["GEMINI_API_KEY"])
+                    model = genai_old.GenerativeModel("gemini-1.5-flash")
+                    resp = model.generate_content(prompt)
+                    gemini_answer = resp.text
+                except Exception as e:
+                    st.write(f"Try1 failed: {e}")
+                
+                # Try 2: New google-genai client
+                if not gemini_answer:
+                    try:
+                        from google import genai
+                        client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+                        resp = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+                        gemini_answer = resp.text
+                    except Exception as e:
+                        st.write(f"Try2 failed: {e}")
+                
+                if gemini_answer:
+                    st.info(gemini_answer)
+                else:
+                    st.warning("Gemini API key issue - Showing extractive answer")
+                    st.info(context[:800])
+
+            if st.button("Clear Results"):
+                st.session_state.selected_doc_index = None
+                st.rerun()
