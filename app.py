@@ -24,7 +24,6 @@ if 'full_content' not in st.session_state:
     st.session_state.full_content = ""
 if 'meta' not in st.session_state:
     st.session_state.meta = {}
-
 # --- WATERMARK + HEADER FIX ---
 st.markdown("""
 <style>
@@ -66,7 +65,6 @@ with col_logo2:
     st.image("https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png", width=80)
 
 st.divider()
-
 st.info("Workflow: User Query -> Embedding -> Vector Search -> Retrieval -> LLM Synthesis")
 
 DATA_FOLDER = "data"
