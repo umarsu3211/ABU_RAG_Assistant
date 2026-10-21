@@ -125,7 +125,7 @@ if files_in_data:
                     import google.generativeai as genai
                     gemini_key = st.secrets["GEMINI_API_KEY"]
                     genai.configure(api_key=gemini_key)
-                    model = genai.GenerativeModel("gemini-2.0-flash")
+                    model = genai.GenerativeModel("gemini-3.8-flash")
 
                     context = st.session_state.full_content
                     query = user_query
