@@ -115,14 +115,44 @@ if docs_text:
                     st.session_state.meta = doc.metadata
         
         if st.session_state.selected_doc_index is not None:
-            st.divider()
-            st.subheader("Full Content")
-            st.write(f"Source: {st.session_state.meta.get('source')} | Page {st.session_state.meta.get('page')}")
-            st.success(st.session_state.full_content)
-            st.markdown("### RAG Answer")
-            st.info(st.session_state.full_content[:1200])
-            if st.button("Clear"):
-                st.session_state.selected_doc_index = None
-                st.rerun()
-else:
-    st.warning("No documents in data/ folder. Add 5 PDFs only.")
+    st.divider()
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Full Content")
+        st.write(f"Source: {st.session_state.meta.get('source')} | Page {st.session_state.meta.get('page')}")
+        st.success(st.session_state.full_content)
+
+    with col2:
+        st.subheader("RAG Answer (Gemini Synthesis)")
+        # --- GEMINI RAG CODE STARTS HERE Line 102 ---
+        try:
+            import google.generativeai as genai
+            
+            gemini_key = st.secrets["GEMINI_API_KEY"]
+            genai.configure(api_key=gemini_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            
+            # This is the RAG prompt - f"Context:" is here
+            context = st.session_state.full_content
+            query = user_query
+            
+            prompt = f"""You are ABU Assistant.
+            Summarize the answer from context in your own words, don't copy verbatim.
+            Be student-friendly.
+            Question: {query}
+            Context: {context}
+            Answer concisely with citation [Source: {st.session_state.meta.get('source')} Page {st.session_state.meta.get('page')}]
+            """
+            
+            response = model.generate_content(prompt)
+            st.info(response.text)
+            
+        except Exception as e:
+            st.error(f"Gemini not connected: {e}")
+            st.info(st.session_state.full_content[:800] + " (Fallback)")
+        # --- GEMINI RAG CODE ENDS ---
+
+    if st.button("Clear"):
+        st.session_state.selected_doc_index = None
+        st.rerun()
