@@ -134,17 +134,20 @@ if files_in_data:
             with col2:
                 st.subheader("RAG Answer (Gemini Summary)")
                 try:
-                    from google import genai
-                    gemini_key = st.secrets["GEMINI_API_KEY"]
-                    client = genai.Client(api_key=gemini_key)
-                    context = st.session_state.full_content
-                    query = user_query
-                    prompt = f"You are ABU Assistant. Summarize in your own words, student-friendly. Question: {query} Context: {context} Cite [Source: {st.session_state.meta.get('source')} Page {st.session_state.meta.get('page')}]"
-                    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
-                    st.info(response.text)
-                except Exception as e:
-                    st.error(f"Gemini error: {e}")
-                    st.info(st.session_state.full_content[:800])
-            if st.button("Clear"):
-                st.session_state.selected_doc_index = None
-                st.rerun()
+    import google.generativeai as genai
+    gemini_key = st.secrets["GEMINI_API_KEY"]
+    genai.configure(api_key=gemini_key)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
+    st.info(response.text)
+except Exception as e2:
+    st.error(f"Gemini error: {e2}")
+    # Fallback to new google-genai client
+    try:
+        from google import genai as new_genai
+        client = new_genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        st.info(response.text)
+    except Exception as e3:
+        st.error(f"Second try failed: {e3}")
+        st.info(st.session_state.full_content[:800])
