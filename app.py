@@ -27,25 +27,56 @@ if 'meta' not in st.session_state:
 # --- WATERMARK + HEADER FIX ---
 st.markdown("""
 <style>
-/* WATERMARK - ABU Logo behind all text */
-.stApp::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('https://upload.wikimedia.org/wikipedia/en/2/29/Ahmadu_Bello_University_logo.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 500px 500px;
-    opacity: 0.07;
-    z-index: -1;
-    pointer-events: none;
-}
-</style>
-""", unsafe_allow_html=True)
 
+import base64
+
+# --- Convert local logo to base64 for watermark ---
+def get_base64_logo(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+try:
+    logo_base64 = get_base64_logo("abu_logo.png")
+    watermark_css = f"""
+    <style>
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('data:image/png;base64,{logo_base64}');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 550px 550px;
+        opacity: 0.08;
+        z-index: -1;
+        pointer-events: none;
+    }}
+    </style>
+    """
+    st.markdown(watermark_css, unsafe_allow_html=True)
+except:
+    pass
+
+# --- HEADER WITH LOCAL LOGOS - WILL ALWAYS SHOW ---
+col_logo1, col_title, col_logo2 = st.columns([1, 4, 1])
+
+with col_logo1:
+    st.image("abu_logo.png", width=90)
+
+with col_title:
+    st.markdown("""
+    <div style='text-align:center'>
+    <b style='color:#c62828;'>STUDENT PROJECT - NOT OFFICIAL ABU WEBSITE</b><br>
+    <span style='color:#006400; font-weight:bold; font-size:22px'>ABU Administrative Knowledge Assistant</span><br>
+    <span style='color:#000;'>COEN 872 - Ahmadu Bello University</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_logo2:
+    st.image("abu_logo.png", width=90)
 # --- HEADER WITH SIDE LOGOS USING COLUMNS (Always works) ---
 col_logo1, col_title, col_logo2 = st.columns([1, 4, 1])
 
