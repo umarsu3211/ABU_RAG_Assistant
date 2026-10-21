@@ -1,7 +1,7 @@
 import streamlit as st, os, base64
 st.set_page_config(page_title="ABU RAG", layout="wide")
 
-logo_path = "abu_logo.png"
+logo_path = "data/abu_logo.png"
 
 # Header - SAFE - no crash if logo missing
 c1,c2,c3 = st.columns([1,4,1])
