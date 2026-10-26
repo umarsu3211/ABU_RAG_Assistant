@@ -1,10 +1,5 @@
 streamlit
-PyPDF2
-python-docx
-langchain
-langchain-community
-langchain-text-splitters
-faiss-cpu
-sentence-transformers
-google-genai
 google-generativeai
+PyPDF2
+faiss-cpu
+numpy
