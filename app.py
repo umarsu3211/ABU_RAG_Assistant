@@ -130,45 +130,27 @@ if files_in_data:
                 st.subheader("RAG Answer (Gemini Summary)")
                 context = st.session_state.full_content
                 prompt = f"You are ABU Assistant. Summarize in your own words, student-friendly. Question: {user_query} Context: {context} Cite [Source: {st.session_state.meta.get('source')} Page {st.session_state.meta.get('page')}]"
-                
-                gemini_answer = None
-                # Try 1: Old google-generativeai
-                try:
-                    import streamlit as st
-import google.generativeai as genai
+                    gemini_answer = None
+    context = st.session_state.full_content
+    question = f"You are ABU Assistant. Summarize in your words: {context[:500]}"
 
-# Configure Gemini - FIXED MODEL NAMES
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    def get_gemini_summary(context, question):
+        prompt = f"You are ABU Administrative Assistant. Answer based on context. Question: {question} Context: {context} Give concise summary with statute reference."
+        models_to_try = [
+            "gemini-2.5-flash",
+            "gemini-1.5-flash-latest",
+            "gemini-1.5-flash-002",
+            "gemini-pro"
+        ]
+        for model_name in models_to_try:
+            try:
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(prompt)
+                return response.text
+            except Exception as e:
+                continue
+        return context[:1500]
 
-def get_gemini_answer(context, question):
-    # New models for 2026 - Google updated names
-    models_to_try = [
-        "gemini-2.5-flash",
-        "gemini-1.5-flash-latest", 
-        "gemini-1.5-flash-002",
-        "gemini-pro"
-    ]
+    gemini_answer = get_gemini_summary(context, question)
+    st.success(gemini_answer)
     
-    prompt = f"""
-    You are ABU Administrative Assistant. Answer based on context.
-    Question: {question}
-    Context: {context}
-    Give concise summary with statute reference.
-    """
-    
-    for model_name in models_to_try:
-        try:
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content(prompt)
-            return response.text, model_name
-        except Exception as e:
-            st.write(f"Try with {model_name} failed: {e}")
-            continue
-    
-    # Fallback if all fail
-    return f"Showing extractive answer (Gemini unavailable):\n\n{context[:1500]}", "extractive"
-
-# In your main code where you show RAG Answer:
-# Replace your old Try1/Try2 code with:
-# answer, used_model = get_gemini_answer(full_content, user_query)
-# st.write(answer)
