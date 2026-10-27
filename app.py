@@ -82,7 +82,7 @@ if "full_content" in st.session_state:
         st.text_area("Raw", st.session_state.full_content, height=400)
     with col2:
         st.subheader("RAG Answer (Gemini Summary)")
-        with st.spinner("Gemini 2.0 is summarizing..."):
+        with st.spinner("Gemini 3.8 is summarizing..."):
             summary = get_gemini_summary(st.session_state.full_content, user_query)
         if "ERROR" in summary:
             st.error(summary)
