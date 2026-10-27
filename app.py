@@ -12,18 +12,34 @@ else:
     st.stop()
 
 def get_gemini_summary(context, question):
-    prompt = f"""You are ABU Zaria Admin Assistant for COEN 872.
+    prompt = f"""You are ABU Zaria Admin Assistant.
 Question: {question}
 Context: {context[:6000]}
 Task: Summarize in 3 bullet points, mention Statute number, simple English. DO NOT copy raw text."""
-    try:
-        response = client.models.generate_content(
-            model="gemini-3.8-flash",
-            contents=prompt
-        )
-        return response.text
-    except Exception as e:
-        return f"GEMINI ERROR: {e}"
+    
+    models_to_try = [
+        "gemini-3.8-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-2.0-flash-lite",
+        "gemini-2.0-flash",
+        "gemini-flash-latest"
+    ]
+    
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt
+            )
+            return f"[{model_name}]\n" + response.text
+        except Exception as e:
+            error_str = str(e)
+            if "503" in error_str or "UNAVAILABLE" in error_str:
+                continue  # Try next model if busy
+            else:
+                continue
+    
+    return "GEMINI ERROR: All models busy (503). Please click Rerun button to try again! High demand now."
 
 st.title("ABU RAG Assistant - COEN 872")
 st.info("Using gemini-3.8-flash - 2026 latest model")
