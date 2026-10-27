@@ -5,28 +5,32 @@ from google import genai
 
 st.set_page_config(page_title="ABU RAG - COEN 872", layout="wide")
 
-# --- LOGOS SECTION ---
-col_logo1, col_title, col_logo2 = st.columns([1,3,1])
+# --- LOGOS - FIXED TO FIND YOUR LOGO IN data/ FOLDER ---
+col_logo1, col_title, col_logo2 = st.columns([1,2.5,1])
 with col_logo1:
-    if os.path.exists("abu_logo.png"):
-        st.image("abu_logo.png", width=100)
-    elif os.path.exists("assets/abu_logo.png"):
-        st.image("assets/abu_logo.png", width=100)
+    # Check all possible places where your logo is
+    logo_paths = ["abu_logo.png", "data/abu_logo.png", "assets/abu_logo.png", "ABU_logo.png"]
+    for lp in logo_paths:
+        if os.path.exists(lp):
+            st.image(lp, width=120)
+            break
     else:
-        st.write("ABU")
+        st.markdown("**ABU**")
 
 with col_title:
-    st.title("ABU RAG Assistant - COEN 872")
+    st.title("ABU RAG Assistant")
+    st.markdown("**COEN 872 - AI Project**")
 
 with col_logo2:
-    if os.path.exists("coen_logo.png"):
-        st.image("coen_logo.png", width=100)
-    elif os.path.exists("assets/coen_logo.png"):
-        st.image("assets/coen_logo.png", width=100)
+    coen_paths = ["coen_logo.png", "data/coen_logo.png", "abu_logo.png", "data/abu_logo.png"]
+    for lp in coen_paths:
+        if os.path.exists(lp):
+            st.image(lp, width=120)
+            break
     else:
-        st.write("COEN")
+        st.markdown("**COEN**")
 
-# --- GEMINI CLIENT ---
+# --- GEMINI ---
 if "GEMINI_API_KEY" in st.secrets:
     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 else:
@@ -34,33 +38,26 @@ else:
     st.stop()
 
 def get_gemini_summary(context, question):
-    prompt = f"""ABU Zaria Admin Assistant. 
-Q: {question}
-Context: {context[:6000]}
-Summarize in 3 bullets, mention Statute, simple English. DO NOT copy raw text."""
-    
-    models_to_try = ["gemini-3.8-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-flash-latest"]
-    
-    for model_name in models_to_try:
+    prompt = f"""ABU Zaria Admin Assistant. Q: {question}. Context: {context[:6000]}. Summarize in 3 short bullets, mention Statute, simple English. DO NOT copy raw text."""
+    models = ["gemini-3.8-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-flash-latest"]
+    for model_name in models:
         try:
-            time.sleep(1)  # Avoid rate limit
+            time.sleep(1)
             response = client.models.generate_content(model=model_name, contents=prompt)
-            return f"✅ {model_name}\n\n" + response.text
+            return response.text
         except Exception as e:
             if "503" in str(e):
                 time.sleep(2)
                 continue
             continue
-    return "⚠️ Google Gemini is overloaded (503 high demand). Click Rerun button at top right or wait 1 min and refresh. Raw PDF is on left - you can still read it!"
+    return "⚠️ Gemini busy (503). Click Rerun button - Raw PDF on left still works!"
 
-st.info("Using gemini-3.8-flash with auto fallback - 2026 model")
-
-# --- LOAD PDFs ---
+# --- LOAD PDFs (Skip .png files) ---
 DATA_FOLDER = "data"
 all_docs = []
 if os.path.exists(DATA_FOLDER):
     for f in os.listdir(DATA_FOLDER):
-        if f.lower().endswith(".pdf"):
+        if f.lower().endswith(".pdf"):  # Only PDFs, ignore .png
             path = os.path.join(DATA_FOLDER, f)
             try:
                 reader = PdfReader(path)
@@ -74,40 +71,34 @@ if os.path.exists(DATA_FOLDER):
             except:
                 pass
 
-if not all_docs:
-    st.warning("No PDFs in data/")
-    st.stop()
-else:
-    st.success(f"Loaded {len(all_docs)} PDFs - Raw and RAG will show below")
+st.success(f"Loaded {len(all_docs)} PDFs - Logos fixed!")
 
-# --- SEARCH ---
 user_query = st.text_input("Ask question:", value="What are functions of Institute of Administration?")
 
-if user_query:
+if user_query and all_docs:
     best_doc = all_docs[0]
     best_score = -1
-    q_words = user_query.lower().split()
     for doc in all_docs:
-        score = sum(1 for w in q_words if w in doc["content"].lower())
+        score = sum(1 for w in user_query.lower().split() if w in doc["content"].lower())
         if score > best_score:
             best_score = score
             best_doc = doc
-    st.session_state.full_content = best_doc["content"]
+    st.session_state.full_content = best_doc["content"][:6000]
     st.session_state.source_name = best_doc["source"]
 
-# --- DISPLAY RAW + RAG ---
 if "full_content" in st.session_state:
     c1, c2 = st.columns(2)
     with c1:
         st.subheader("Full Content (Raw from PDF)")
         st.caption(f"Source: {st.session_state.get('source_name','')}")
-        st.text_area("Raw Text", st.session_state.full_content[:5000], height=500, key="raw_box")
+        st.text_area("Raw", st.session_state.full_content, height=500)
     with c2:
         st.subheader("RAG Answer (Gemini Summary)")
         with st.spinner("Summarizing..."):
             summary = get_gemini_summary(st.session_state.full_content, user_query)
-        if "503" in summary or "overloaded" in summary:
+        if "busy" in summary or "503" in summary:
             st.warning(summary)
-            st.button("🔄 Rerun / Try Again")
+            if st.button("🔄 Try Again"):
+                st.rerun()
         else:
             st.success(summary)
